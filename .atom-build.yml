@@ -1,0 +1,10 @@
+cmd: "./build.sh"
+name: "Build"
+sh: false,
+cwd: "{PROJECT_PATH}"
+targets:
+  clean:
+      cmd: "./clean.sh"
+      name: "Build"
+      sh: false,
+      cwd: "{PROJECT_PATH}"
