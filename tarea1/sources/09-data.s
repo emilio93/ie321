@@ -3,8 +3,8 @@
 #
 #datos utilizados en el programa
 .data
-coma: .asciiz ", "
-newline: .asciiz "\n"
+  coma: .asciiz ", "
+  newline: .asciiz "\n"
   texto_fibonacci_0: .asciiz "1"
   texto_fibonacci_1: .asciiz "1, 1"
   texto_respuesta: .asciiz "El resultado es: \n"
