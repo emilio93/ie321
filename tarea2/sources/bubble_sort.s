@@ -41,8 +41,8 @@ bSort_sort:
 
   sll $t0, $s2, 2 # i*4
   add $t0, $t0, $a0 # indice actual
-  lw $t1, 0($t0) # a[i]
-  lw $t2, 4($t0) # a[i+1]
+  lw $t1, 4($t0) # a[i+1]
+  lw $t2, 0($t0) # a[i]
 
   add $a3, $zero, $t0
   ble $t1, $t2, bSort_noswap # noswap

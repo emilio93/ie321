@@ -14,6 +14,7 @@ print_data:
   addi $t0, $zero, 0 # contador
   addi $t4, $a1, -1 # limite superior
 
+  # para cada registro del arreglo
   print_data_loop:
     # if (i>(len-1))
     bgt $t0, $t4, stop_print_data

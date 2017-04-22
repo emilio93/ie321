@@ -36,7 +36,7 @@ function BubbleSort(array) {
         this.sigN = 0;
         // bSort_sort
         for (this.i = 0; this.i < (this.arr.length - 1); this.i++)
-            if (this.arr[this.i] > this.arr[this.i+1]) {
+            if (this.arr[this.i] < this.arr[this.i+1]) {
                 // bSort_swap
                 let ival = this.arr[this.i];
                 let jval = this.arr[this.i+1];
