@@ -1,3 +1,6 @@
+
+# imprime un caracter newline
+#
 newline:
   add $t1, $a0, $zero # guardar
   li $v0, 4

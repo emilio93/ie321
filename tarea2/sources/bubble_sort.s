@@ -1,3 +1,4 @@
+
 # bubble_sort
 #
 # $a0 : (A) direccion que apunta a A
@@ -15,38 +16,48 @@ bubble_sort:
   # n = $s0
   add $s0, $zero, $a1
 
-# bSort_while
-#
-# codigo dentro del do ... while (n>0)
-# n es el indice del ultimo numero que se debe hacer swap
-# n es el indice del primer numero ultimo par al cual se le aplicó un swap
-bSort_while:
+  # bSort_while
+  #
+  # codigo dentro del do ... while (n>0)
+  # n es el indice del ultimo numero que se debe hacer swap
+  # n es el indice del primer numero ultimo par al cual se le
+  # aplicó un swap
+  bSort_while:
 
-  # sigN = 0
-  # sigN = $s1
-  addi $s1, $zero, 0
+    # sigN = 0
+    # sigN = $s1
+    addi $s1, $zero, 0
 
-  # i = 0
-  # i = $s2
-  addi $s2, $zero, 0
+    # i = 0
+    # i = $s2
+    addi $s2, $zero, 0
 
-bSort_sort:
+  # bSort_sort
+  #
+  # Ciclo do { ... } while (i < (len-1))
+  bSort_sort:
+    # $t0 = $a1 - 1
+    # $t0 = len - 1
+    addi $t0, $a1, -1
+    # if i => (len-1), end for
+    bge $s2, $t0, bSort_while_check
 
-  # $t0 = $a1 - 1
-  # $t0 = len - 1
-  addi $t0, $a1, -1
+    # se carga en $t1, $t2 los valores i-esimo e (i+1)-esimos
+    # del arreglos $a0
+    sll $t0, $s2, 2 # i*4
+    add $t0, $t0, $a0 # indice actual
+    lw $t1, 4($t0) # a[i+1]
+    lw $t2, 0($t0) # a[i]
 
-  # if i => (len-1), end for
-  bge $s2, $t0, bSort_while_check
+    # $a3 es el parametro para bSort_swap
+    add $a3, $zero, $t0
+    # chequear si se debe hacer swap
+    ble $t1, $t2, bSort_noswap # noswap cuando a[i+1] <= a[i]
 
-  sll $t0, $s2, 2 # i*4
-  add $t0, $t0, $a0 # indice actual
-  lw $t1, 4($t0) # a[i+1]
-  lw $t2, 0($t0) # a[i]
-
-  add $a3, $zero, $t0
-  ble $t1, $t2, bSort_noswap # noswap
-
+  # bSort_swap
+  #
+  # cambia el numero en una direccion de memoria por
+  # el siguiente registro y viceversa
   bSort_swap:
     lw $t0, 0($a3) # $t0 = a[i]
     lw $t1, 4($a3) # $t1 = a[i+1]
@@ -54,26 +65,34 @@ bSort_sort:
     sw $t1, 0($a3) # a[i+1] = $t0
     addi $s1, $s2, 1 # sigN = i + 1
 
+  # bSort_noswap
+  #
+  # incrementa el contador y regresa a inicio del loop
+  # note que aunque haya swap se adelanta a bSort_noswap,
+  # por el contrario cuando no hay swap no se pasa por
+  # bSort_swap
   bSort_noswap:
     addi $s2, $s2, 1
     j bSort_sort
 
-# bSort_while_check
-# se mantiene en el while  mientras n($s0) != 0
-bSort_while_check:
-  add $s0, $zero, $s1 # n = sigN
-  bne $zero, $s0, bSort_while # if n != 0 then bSort_while
+  # bSort_while_check
+  #
+  # se mantiene en el while  mientras n($s0) != 0
+  bSort_while_check:
+    add $s0, $zero, $s1 # n = sigN
+    bne $zero, $s0, bSort_while # if n != 0 then bSort_while
 
-# bSort_exit
-# se recupera los registros guardados en el stack
-# se libera el espacio en el stack
-# se regresa a $ra
-bSort_exit:
-  lw $ra, 0($sp)
-  lw $a0, 4($sp)
-  lw $a1, 8($sp)
-  lw $s0, 12($sp)
-  lw $s1, 16($sp)
-  lw $s2, 20($sp)
-  addi $sp, $sp, 24
-  jr $ra
+  # bSort_exit
+  #
+  # se recupera los registros guardados en el stack
+  # se libera el espacio en el stack
+  # se regresa a $ra
+  bSort_exit:
+    lw $ra, 0($sp)
+    lw $a0, 4($sp)
+    lw $a1, 8($sp)
+    lw $s0, 12($sp)
+    lw $s1, 16($sp)
+    lw $s2, 20($sp)
+    addi $sp, $sp, 24
+    jr $ra
