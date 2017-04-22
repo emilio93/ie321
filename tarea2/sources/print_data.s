@@ -1,44 +1,58 @@
 
 # print_data
 #
+# imprime un arreglo
+#
 # $a0 : (A) direccion de inicio
 # $a1 : (len) longitud del arreglo
 print_data:
-  addi $sp, $sp, -4
+  addi $sp, $sp, -12
   sw $ra, 0($sp)
+  sw $a0, 4($sp)
+  sw $a1, 8($sp)
 
   addi $t0, $zero, 0 # contador
   addi $t4, $a1, -1 # limite superior
 
-print_data_loop:
-  bgt $t0, $t4, stop_print_data
+  print_data_loop:
+    # if (i>(len-1))
+    bgt $t0, $t4, stop_print_data
 
-  sll $t1, $t0, 2
-  add $t2, $a0, $t1
+    # $a0 + 4 * i
+    sll $t1, $t0, 2
+    add $t2, $a0, $t1
 
-  bne $t0, $zero, print_data_coma
-  j print_data_loop2
+    # poner coma si no es el primer item
+    bne $t0, $zero, print_data_coma
 
-print_data_loop2:
-  add $t3, $zero, $a0
-  li $v0, 1
-  lw $a0, 0($t2)
-  syscall
-  add $a0, $zero, $t3
+    j print_data_loop2
 
-  addi $t0, $t0, 1
+  # imprimir el numero
+  print_data_loop2:
+    add $t3, $zero, $a0
+    li $v0, 1
+    lw $a0, 0($t2)
+    syscall
+    add $a0, $zero, $t3
 
-  j print_data_loop
+    # i = i + 1
+    addi $t0, $t0, 1
 
-print_data_coma:
-  add $t3, $zero, $a0
-  li $v0, 4
-  la $a0, coma
-  syscall
-  add $a0, $zero, $t3
-  j print_data_loop2
+    j print_data_loop
 
-stop_print_data:
-  lw $ra, 0($sp)
-  addi $sp, $sp, 4
-  jr $ra
+  # imprime coma
+  print_data_coma:
+    add $t3, $zero, $a0
+    li $v0, 4
+    la $a0, coma
+    syscall
+    add $a0, $zero, $t3
+    j print_data_loop2
+
+  # reasigna los registros
+  stop_print_data:
+    sw $ra, 0($sp)
+    sw $a0, 4($sp)
+    sw $a1, 8($sp)
+    addi $sp, $sp, 12
+    jr $ra

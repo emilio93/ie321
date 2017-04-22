@@ -4,9 +4,10 @@
 # Tarea 2
 # Emilio Javier Rojas Álvarez - B15680
 #
-# se implementa el siguiente pseudocodigo en mips
+# Se implementa el siguiente pseudocodigo en mips
+# para ordenar un arreglo dado, segun el algoritmo
+# bubble sort
 #
-# 
 # procedure bubbleSort( A : list of sortable items )
 # n = length(A)
 #     repeat
