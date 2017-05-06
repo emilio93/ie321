@@ -6,6 +6,10 @@
 #
 # Se implementa el algoritmo tal cual de
 # la figura 3.5 del libro de texto.
+# Se utiliza aritmética de 64 bits para poder
+# representar una multiplicación de dos numeros
+# cuya suma de bits significativos sea mayor a
+# 32
 # Adicional a esto una interfaz simple para
 # que el usuario realice las multiplicaciones
 
@@ -16,33 +20,42 @@
 #
 # metodo main se ejecuta al inicio dl programa
 main:
-  # label del inicio del programa
+  # etiqueta de inicio del programa
   inicio:
 
     # Solicita el multiplicando al usuario
-    # Solicita el multiplicando al usuario
     solicitar_multiplicando:
-      addi $v0, $zero,  4 # print string
+      # imprimir la solictud
+      li $v0, 4 # print string
       la $a0, solicitud_multiplicando
       syscall
+
+      # leer entrada del usuario
       addi $v0, $zero, 5 # read int
       syscall
-      add $t0, $zero, $v0 # guardar respuesta en $t0
+
+      # guardar la entrada del usuaro en registro
+      add $t0, $zero, $v0
 
     # Solicita el multiplicador al usuario
     solicitar_multiplicador:
-      addi $v0, $zero,  4 # print string
+      # imprimir solicitud
+      li $v0, 4 # print string
       la $a0, solicitud_multiplicador
       syscall
+
+      # leer entrada del usuario
       addi $v0, $zero, 5 # read int
       syscall
+
+      # guardar entrada del usuario en registro
       add $t1, $zero, $v0 # guardar respuesta en $t1
 
     # asigna el multiplicando y multiplicador a los
     # argumentos $a0 y $a1
     asignar_variables:
-      add $a0, $zero, $t0
-      add $a1, $zero, $t1
+      move $a0, $t0
+      move $a1, $t1
 
     # ejecuta la multiplicacion
     llamar_multiplicar:
@@ -50,14 +63,31 @@ main:
 
     # indica la respuesta de la multiplicacion
     imprimir_respuesta:
-      add $t0, $zero, $v0
-      addi $v0, $zero,  4 # print string
+      move $s0, $v0 # mantener en $s0 parte superior
+      move $s1, $v1 # mantener en $s1 parte inferior
+
+      li $v0, 4 # print string
       la $a0, texto_resultado
       syscall
-      add $v0, $zero, $t0
-      add $t0, $zero, $v0
-      addi $v0, $zero,  1 # print int
-      add $a0, $zero, $t0
+
+      jal newline
+
+      li $v0, 4 # print string
+      la $a0, texto_resultado_sup
+      syscall
+
+      li $v0, 1 # print int
+      move $a0, $s0
+      syscall
+
+      jal newline
+
+      li $v0, 4 # print string
+      la $a0, texto_resultado_inf
+      syscall
+
+      li $v0, 1 # print int
+      move $a0, $s1
       syscall
 
     # permite realizar otra multiplicacion
@@ -71,26 +101,32 @@ main:
 # Multiplica $a0 con $a1
 # y guarda el resultado en $v0 $v1
 #
-# $a0 es multiplicando
-# $a1 es multiplicador
+# parametros:
+#   $a0 es multiplicando
+#   $a1 es multiplicador
+# salidas:
+#   $v0 es parte izquierda de la respuesta
+#   $v1 es parte derecha de la respuesta
 multiplicar:
   # guardar los registros en el stack pointer
   multiplicar_guardar_registros:
-    addi $sp, $sp, -24
+    addi $sp, $sp, -32
     sw $ra, 0($sp)
     sw $a0, 4($sp)
     sw $a1, 8($sp)
     sw $s0, 12($sp)
     sw $s1, 16($sp)
     sw $s2, 20($sp)
+    sw $s3, 24($sp)
+    sw $s4, 28($sp)
 
   # inicializa el contador, iteracion máxima
   # y valor del producto.
   multiplicar_iniciar_variables:
-    addiu $s0, $zero, 0 # contador i
-    addiu $s1, $zero, 31 # cantidad de iteraciones - 1
-    addiu $v0, $zero, 0 # producto
-    addiu $v1, $zero, 0 # producto
+    li $s0, 0 # contador i
+    li $s1, 31 # cantidad de iteraciones - 1
+    li $v0, 0 # producto parte izquierda
+    li $v1, 0 # producto parte derecha
 
   # obtiene el bit 0 del multiplicador y actua
   # segun lo obtenido (0 o 1)
@@ -101,10 +137,23 @@ multiplicar:
 
   # if multiplier's bit 0 = 1
   multiplicar_multiplier0:
+    # guardr argumentos
+    move   $t0, $a0
+    move   $t1, $a1
+
     # guardar en el producto la suma del
     # multiplicando y el producto
+    # cargar argumentos de la suma
+    addu $a2, $zero, $zero
+    addu $a3, $a0, $zero
 
-    add $v0, $v0, $a0
+    addu $a0, $v0, $zero
+    addu $a1, $v1, $zero
+    jal sum64
+    # restaurar argumentos
+    move   $a0, $t0
+    move   $a1, $t1
+
     j multiplicar_shift_multiplicand_left
 
   # if multiplier's bit 0 = 0
@@ -123,7 +172,9 @@ multiplicar:
   # y salir cuando se cumplan
   multiplicar_check_iteration:
     bgt $s0, $s1, multiplicar_restaurar_registros
-    addi $s0, $s0, 1
+    # tambien, si el multiplocador es 0, la operacion esta lista
+    beq $a1, $zero, multiplicar_restaurar_registros
+    addiu $s0, $s0, 1 # i++
     j multiplicar_test_multiplier0
 
   # restaurar los registros del stack pointer
@@ -135,7 +186,9 @@ multiplicar:
     lw $s0, 12($sp)
     lw $s1, 16($sp)
     lw $s2, 20($sp)
-    addi $sp, $sp, 24
+    lw $s3, 24($sp)
+    lw $s4, 28($sp)
+    addi $sp, $sp, 32
     jr $ra
 
 # MINI ALU 64
@@ -210,13 +263,13 @@ sub64:
 # sll64
 #
 # switch left logical $a0 $a1 in $v0 $v1
-# also $s0 indicates overflow
+# also $t9 indicates overflow
 sll64:
   # first check overflow, so $a0's MSB shouldn't be 1
-  addiu $s0, $zero, 0
+  addiu $t9, $zero, 0
   srl $t0, $a0, 31
   beq $t0, $zero, sll64_nooverflow
-  addiu $s0, $zero, 1
+  addiu $t9, $zero, 1
 
   # always execute, only a label to jump to if no overflow
   sll64_nooverflow:
@@ -237,6 +290,18 @@ srl64:
   or $v1, $t0, $v1
   jr $ra
 
+# imprime un caracter newline
+#
+newline:
+  add $t1, $zero, $a0
+  add $t2, $zero, $v0
+  li $v0, 4
+  la $a0, texto_newline
+  syscall
+  add $a0, $zero, $t1
+  add $v0, $zero, $t2
+  jr $ra
+
 # data
 #
 #datos utilizados en el programa
@@ -244,3 +309,6 @@ srl64:
   solicitud_multiplicando: .asciiz "\nIngrese el multiplicando:\n"
   solicitud_multiplicador: .asciiz "Ingrese el multiplicador:\n"
   texto_resultado: .asciiz "Resultado: "
+  texto_resultado_sup: .asciiz "Parte superior(decimal representado en compemento a 2): "
+  texto_resultado_inf: .asciiz "Parte inferior(decimal representado en compemento a 2): "
+  texto_newline: .asciiz "\n"
