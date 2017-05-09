@@ -24,7 +24,7 @@ dividir:
   # y valor del producto.
   dividir_iniciar_variables:
     li $s0, 0 # contador i se inicializa en 0
-    li $s1, 32 # maximo iteraciones son 33
+    li $s1, 32 # maximo iteraciones son 33 (32+1)
 
     # divisor 64 bits
     li $s2, 0
@@ -35,7 +35,7 @@ dividir:
     move $s5, $a0 # parte lo del residuo se inicializa con valor de dividendo
 
     # cociente
-    li $s6, 0 # cociente se inicializa en 0
+    li $s6, 0 # cociente se inicializa en 0 y es de 32 bits
 
     j dividir_paso_1
 
@@ -48,7 +48,7 @@ dividir:
     move $a2, $s2
     move $a3, $s3
 
-    # restar
+    # restar ($s4 $s5) = ($s4 $s5) - ($s2 $s3)
     jal sub64
 
     # guardar en residuo
@@ -63,8 +63,10 @@ dividir:
     bge $s5, $zero, dividir_paso_2_a # if residuo >= 0 then dividir_paso_2_a
     j dividir_paso_2_b
 
-  # no hace nada, pasa directo al paso 3
+  # poner 1 en cociente
   dividir_paso_2_a:
+    sll $s6, $s6, 1
+    ori $s6, $s6, 1
     j dividir_paso_3
 
   # guarda en residuo la suma del residuo y el divisor
@@ -98,6 +100,8 @@ dividir:
   # asegurarse que se hagan las 33 iteraciones necesarias
   # y salir cuando se cumplan
   dividir_check_iteration:
+    bne $s2, $zero, dividir_paso_1 #aun no es 0
+    beq $s3, $zero, dividir_restaurar_registros
     bgt $s0, $s1, dividir_restaurar_registros
     addi $s0, $s0, 1
     j dividir_paso_1
@@ -106,8 +110,8 @@ dividir:
   # y regresar al programa mediante $ra
   dividir_restaurar_registros:
     # valores devueltos
-    move $s6, $v0
-    move $s5, $v1
+    move $v0, $s6
+    move $v1, $s5
 
     lw $ra, 0($sp)
     lw $a0, 4($sp)

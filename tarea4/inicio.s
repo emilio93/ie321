@@ -19,7 +19,7 @@
   solicitud_dividendo: .asciiz "\nIngrese el Dividendo:\n"
   solicitud_divisor: .asciiz "Ingrese el Divisor:\n"
   texto_error_divisor: .asciiz "El divisor no puede ser cero.\n"
-  texto_resultado: .asciiz "Resultado(cociente + residuo/divisor): "
+  texto_resultado: .asciiz "Resultado(cociente \n residuo):\n "
 
 .text
 
@@ -35,9 +35,11 @@ main:
       addi $v0, $zero,  4 # print string
       la $a0, solicitud_dividendo
       syscall
+
       addi $v0, $zero, 5 # read int
       syscall
-      add $t0, $zero, $v0 # guardar respuesta en $t0
+      move $s0, $v0 # guardar respuesta
+
       j solicitar_divisor # primer solicitud no indica error de divisor cero
 
     # Solicita el divisor al usuario
@@ -45,48 +47,48 @@ main:
       addi $v0, $zero,  4 # print string
       la $a0, texto_error_divisor
       syscall
+
     solicitar_divisor:
       addi $v0, $zero,  4 # print string
       la $a0, solicitud_divisor
       syscall
-      addi $v0, $zero, 5 # read int
+
+      li $v0, 5 # read int
       syscall
-      beq $v0, $zero, divisor_incorrecto # evitar divisor cero
-      add $t1, $zero, $v0 # guardar respuesta en $t1
+
+      move $s1, $v0 # guardar respuesta en $t1
+      beq $s1, $zero, divisor_incorrecto # evitar divisor cero
 
     # asigna el dividendo y divisor a los
     # argumentos $a0 y $a1
     asignar_variables:
-      add $a0, $zero, $t0 # dividendo
-      add $a1, $zero, $t1 # divisor
+      move $a0, $s0 # dividendo
+      move $a1, $s1 # divisor
 
     # ejecuta la division
     llamar_dividir:
       jal dividir
+      # guardar resultados
+      move $s0, $v0
+      move $s1, $v1
 
     # indica la respuesta de la division
     imprimir_respuesta:
-      add $t0, $zero, $v0
       li $v0, 4 # print string
       la $a0, texto_resultado
       syscall
-      add $v0, $zero, $t0
 
-      add $t0, $zero, $v0
+      #cociente
       li $v0, 1 # print int
-      add $a0, $zero, $t0
+      move $a0, $s0
       syscall
-      add $v0, $zero, $t0
 
       jal newline
 
-      add $t0, $zero, $v0
-      add $t1, $zero, $v1
+      #residuo
       li $v0, 1 # print int
-      add $a0, $zero, $t1
+      move $a0, $s1
       syscall
-      add $v0, $zero, $t0
-      add $v1, $zero, $t1
 
     # permite realizar otra division
     reiniciar:
