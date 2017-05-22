@@ -5,37 +5,37 @@
   texto_newline: .asciiz "\n"
 .text
 main:
-  test_sum64_1:
-    li $a0, 0xfffff
-    li $a1, 0xfffff
-    li $a2, 0xfffff
-    li $a3, 0xffffffff
-    jal sum64
-
-    move $s0, $v0
-    move $s1, $v1
-
-    # print hex result, should be
-    # 0x001fffff
-    # 0x000ffffe
-    # http://www.miniwebtool.com/hex-calculator/?number1=fffff000fffff&operate=1&number2=fffffffffffff
-
-    li $v0, 34 # print hex
-    move $a0, $s0
-    syscall
-
-    jal newline
-
-    li $v0, 34 # print hex
-    move $a0, $s1
-    syscall
-
-    jal newline
-
-  test_twoscomplement64_1:
-    li $a0, 0x0
-    li $a1, 0x1
-    jal twoscomplement64
+  # test_sum64_1:
+  #   li $a0, 0xfffff
+  #   li $a1, 0xfffff
+  #   li $a2, 0xfffff
+  #   li $a3, 0xffffffff
+  #   jal sum64
+  #
+  #   move $s0, $v0
+  #   move $s1, $v1
+  #
+  #   # print hex result, should be
+  #   # 0x001fffff
+  #   # 0x000ffffe
+  #   # http://www.miniwebtool.com/hex-calculator/?number1=fffff000fffff&operate=1&number2=fffffffffffff
+  #
+  #   li $v0, 34 # print hex
+  #   move $a0, $s0
+  #   syscall
+  #
+  #   jal newline
+  #
+  #   li $v0, 34 # print hex
+  #   move $a0, $s1
+  #   syscall
+  #
+  #   jal newline
+  #
+  # test_twoscomplement64_1:
+  #   li $a0, 0x0
+  #   li $a1, 0x1
+  #   jal twoscomplement64
 
   test_sub64_1:
     li $a0, 0x0

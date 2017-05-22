@@ -27,8 +27,8 @@ dividir:
     li $s1, 32 # maximo iteraciones son 33 (32+1)
 
     # divisor 64 bits
-    li $s2, 0
-    move $s3, $a1
+    move $s2, $a1 # parte hi del divisor se inicializa con valor del divisor
+    li $s3, 0
 
     # residuo-dividendo 64 bits
     li $s4, 0
@@ -42,7 +42,8 @@ dividir:
   # El paso 1 es restarle al residuo el divisor y guardar resultado
   # en el residuo
   dividir_paso_1:
-    # cargar argumentos
+
+    # cargar argumentos para la suma
     move $a0, $s4
     move $a1, $s5
     move $a2, $s2
@@ -54,6 +55,7 @@ dividir:
     # guardar en residuo
     move $s4, $v0
     move $s5, $v1
+
     j dividir_test_residuo
 
   # identifica si el residuo es menor a cero y actua segun el resultado
@@ -63,22 +65,23 @@ dividir:
     bge $s5, $zero, dividir_paso_2_a # if residuo >= 0 then dividir_paso_2_a
     j dividir_paso_2_b
 
-  # poner 1 en cociente
+  # sll y poner 1 en cociente
   dividir_paso_2_a:
-    sll $s6, $s6, 1
-    ori $s6, $s6, 1
+    sll $s6, $s6, 1 # Q << 1
+    ori $s6, $s6, 1 # Q_0 = 1
     j dividir_paso_3
 
   # guarda en residuo la suma del residuo y el divisor
   # desplaza cociente a la izquierda un bit
   # asigna 1 el LSB del cociente
   dividir_paso_2_b:
-    # cargar argumentos para la resta
+    # cargar argumentos para la suma
     move $a0, $s4
     move $a1, $s5
     move $a2, $s2
     move $a3, $s3
 
+    #restaura valor de residuo
     jal sum64
 
     # guardar resultado en residuo
@@ -100,8 +103,6 @@ dividir:
   # asegurarse que se hagan las 33 iteraciones necesarias
   # y salir cuando se cumplan
   dividir_check_iteration:
-    bne $s2, $zero, dividir_paso_1 #aun no es 0
-    beq $s3, $zero, dividir_restaurar_registros
     bgt $s0, $s1, dividir_restaurar_registros
     addi $s0, $s0, 1
     j dividir_paso_1
@@ -111,7 +112,7 @@ dividir:
   dividir_restaurar_registros:
     # valores devueltos
     move $v0, $s6
-    move $v1, $s5
+    move $v1, $s4
 
     lw $ra, 0($sp)
     lw $a0, 4($sp)

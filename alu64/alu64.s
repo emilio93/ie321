@@ -59,6 +59,9 @@ sub64:
   # get its twos complement
   jal twoscomplement64
 
+  move $a2, $v0
+  move $a3, $v1
+
   # restore values to $a0 and $a1
   lw $a0, 4($sp)
   lw $a1, 8($sp)
