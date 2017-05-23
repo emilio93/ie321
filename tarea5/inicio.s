@@ -13,20 +13,33 @@
 .data
   texto_newline: .asciiz "\n"
 
-  float_cte_2: .float 2.0
+  float_cte_2: .float 2,0
 
-  ej1_cateto1: .float 3.0
-  ej1_cateto2: .float 4.0
+  ej1_cateto1: .float 3,0
+  ej1_cateto2: .float 4,0
   ej1_texto: .asciiz "Cateto 1: 3.0\nCateto 2: 4.0"
 
-  ej2_cateto1: .float 30.5
-  ej2_cateto2: .float 42.7
+  ej2_cateto1: .float 30,50
+  ej2_cateto2: .float 42,70
   ej2_texto: .asciiz "Cateto 1: 30.5\nCateto 2: 42.7"
 
-  solicitud_cateto1: .asciiz "\nIngrese el cateto 1:\n"
-  solicitud_cateto2: .asciiz "\nIngrese el cateto 2:\n"
+  solicitud_cateto1: .asciiz "\nIngrese el cateto 1(mayor a 0):\n"
+  solicitud_cateto2: .asciiz "\nIngrese el cateto 2(mayor a 0):\n"
 
   texto_repuesta: .asciiz "La hipotenusa es:"
+  texto_error_infinito: .asciiz "Los numeros son muy grandes, ocurrió un error."
+
+  # datos para prueba de raiz
+  raiz_test_inicio: .asciiz "inicio test raiz\n"
+  raiz_test_float1: .float 1,0 # raiz debe ser 1.0
+  raiz_test_float2: .float 2,0 # raiz debe ser ~ 1.4142
+  raiz_test_float3: .float 4,0 # raiz debe ser 2.0
+  raiz_test_float4: .float 7,0 # raiz debe ser ~ 2.6457
+  raiz_test_float5: .float 20,0 # raiz debe ser ~ 4.4721
+  raiz_test_float6: .float 36,0 # raiz debe ser 6.0
+  raiz_test_float7: .float 102,0 # raiz debe ser 10.0995
+  raiz_test_float8: .float 400,0 # raiz debe ser 20.0
+  raiz_test_fin: .asciiz "fin test raiz\n"
 
 .text
 
@@ -86,6 +99,8 @@ main:
 
       jal newline
 
+      # jal test_raiz
+
     # permite al usuario definir dos catetos para obtener la hipotenusa
     # correspondiente
     programa_usuario:
@@ -96,14 +111,23 @@ main:
         jal solicitud_float
         mov.s $f1, $f0 # cateto 1 en $f1, orden no importa
 
+        jal respuesta_mayor_a_cero
+        bne $v0, $zero, solicitar_c1
+
       solicitar_c2:
         la $a0, solicitud_cateto2
         jal imprimir_asciiz
 
         jal solicitud_float # cateto 2 en $f0
-        
+
+        jal respuesta_mayor_a_cero
+        bne $v0, $zero, solicitar_c2
+
       calculo:
         jal hipotenusa
+
+        jal no_infinito
+        bne $v0, $zero, error_infinito
 
       respuesta:
         la $a0, texto_repuesta
@@ -112,6 +136,12 @@ main:
         # $f1 a $f12 para impresion
         mov.s $f12, $f1
         jal imprimir_float
+        j reiniciar
+
+      error_infinito:
+        la $a0, texto_error_infinito
+        jal imprimir_asciiz
+        j reiniciar
 
       # vuelve a solicitar datos a usuario para calculo de la hipotenusa
       reiniciar:

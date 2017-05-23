@@ -8,6 +8,8 @@
 # recibe los catetos 1 y 2
 # $f0 cateto 1
 # $f1 cateto 2
+#
+# respuesta en $f0
 
 hipotenusa:
   hipotenusa_guardar_registros:
@@ -17,15 +19,34 @@ hipotenusa:
     sw $s1, 8($sp)
 
   hipotenusa_calculo:
+    # mascara para chequear infinito
+    # infinito representado en float:
+    # s|exponente |fraccion
+    # 0|111 1111 1|000 0000 0000 0000 0000 0000
+    li $t0, 0x7f800000
+
+    # elevar al cuadrado y chequear no overflow en cateto 1
     mul.s $f2, $f0, $f0 # c1^2
+    mfc1 $t1, $f2
+    beq $t1, $t0, hipotenusa_error
+
+    # elevar al cuadrado y chequear no overflow en cateto 2
     mul.s $f3, $f1, $f1 # c2^2
+    mfc1 $t1, $f3
+    beq $t1, $t0, hipotenusa_error
 
+    # sumar cuadrados y chequear overflow
     add.s $f4, $f2, $f3 # c1^2 + c2^2
+    mfc1 $t1, $f4
+    beq $t1, $t0, hipotenusa_error
 
-    mov.s $f9, $f0
-    mov.s $f0, $f4
+    mov.s $f0, $f4 # resultado en $f0
 
     jal raiz
+    j hipotenusa_fin
+
+  hipotenusa_error:
+    mtc1 $t0, $f0 # se devuelve inf para indicar error
 
   hipotenusa_fin:
     lw $ra, 0($sp)

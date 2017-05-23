@@ -18,6 +18,7 @@
 # repetir 20 veces:
 #   x' = (x+N/x)/2
 #   x = x'
+
 raiz:
   raiz_guardar_registros:
     addiu $sp, $sp, -8
