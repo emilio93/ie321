@@ -13,8 +13,6 @@
 .data
   texto_newline: .asciiz "\n"
 
-  float_cte_2: .float 2,0
-
   ej1_cateto1: .float 3,0
   ej1_cateto2: .float 4,0
   ej1_texto: .asciiz "Cateto 1: 3.0\nCateto 2: 4.0"
@@ -23,11 +21,12 @@
   ej2_cateto2: .float 42,70
   ej2_texto: .asciiz "Cateto 1: 30.5\nCateto 2: 42.7"
 
-  solicitud_cateto1: .asciiz "\nIngrese el cateto 1(mayor a 0):\n"
-  solicitud_cateto2: .asciiz "\nIngrese el cateto 2(mayor a 0):\n"
+  solicitud_cateto1: .asciiz "Ingrese el cateto 1(mayor a 0):\n"
+  solicitud_cateto2: .asciiz "Ingrese el cateto 2(mayor a 0):\n"
 
-  texto_repuesta: .asciiz "La hipotenusa es:"
-  texto_error_infinito: .asciiz "Los numeros son muy grandes, ocurrió un error."
+  texto_repuesta: .asciiz "La hipotenusa es: "
+  texto_error_infinito: .asciiz "Ocurrio un overflow"
+  texto_hr: .asciiz "------------------\n"
 
   # datos para prueba de raiz
   raiz_test_inicio: .asciiz "inicio test raiz\n"
@@ -49,6 +48,12 @@
 main:
   # label del inicio del programa
   inicio:
+
+    # jal test_raiz
+    # # separador
+    # la $a0, texto_hr
+    # jal imprimir_asciiz
+
     ejemplo1:
       # cargar catetos ejemplo 1
       lwc1 $f0, ej1_cateto1
@@ -68,11 +73,15 @@ main:
 
       jal newline
 
-      # $f1 a $f12 para impresion
+      # $f1 a $f12 para impresion de respuesta
       mov.s $f12, $f1
       jal imprimir_float
 
       jal newline
+
+      # separador
+      la $a0, texto_hr
+      jal imprimir_asciiz
 
     ejemplo2:
       # cargar catetos ejemplo 2
@@ -99,11 +108,13 @@ main:
 
       jal newline
 
-      # jal test_raiz
+      la $a0, texto_hr
+      jal imprimir_asciiz
 
     # permite al usuario definir dos catetos para obtener la hipotenusa
     # correspondiente
     programa_usuario:
+      #solicitar el cateto 1
       solicitar_c1:
         la $a0, solicitud_cateto1
         jal imprimir_asciiz
@@ -114,11 +125,13 @@ main:
         jal respuesta_mayor_a_cero
         bne $v0, $zero, solicitar_c1
 
+      # solicitar el cateto 2
       solicitar_c2:
         la $a0, solicitud_cateto2
         jal imprimir_asciiz
 
-        jal solicitud_float # cateto 2 en $f0
+        # cateto 2 en $f0
+        jal solicitud_float
 
         jal respuesta_mayor_a_cero
         bne $v0, $zero, solicitar_c2
@@ -126,9 +139,11 @@ main:
       calculo:
         jal hipotenusa
 
-        jal no_infinito
-        bne $v0, $zero, error_infinito
+        # se chequea que no haya overflow
+        jal no_infinito # $v0 es 1 hay overflow
+        bne $v0, $zero, error_infinito # imprime error y reinicia
 
+      # imprime el resultado
       respuesta:
         la $a0, texto_repuesta
         jal imprimir_asciiz
@@ -138,6 +153,7 @@ main:
         jal imprimir_float
         j reiniciar
 
+      # imprime error de overflow
       error_infinito:
         la $a0, texto_error_infinito
         jal imprimir_asciiz
@@ -145,6 +161,10 @@ main:
 
       # vuelve a solicitar datos a usuario para calculo de la hipotenusa
       reiniciar:
+        jal newline
+        la $a0, texto_hr
+        jal imprimir_asciiz
+
         j programa_usuario
 
     # nunca se llega acá, pero parece adecuado tener esta etiqueta

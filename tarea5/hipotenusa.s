@@ -27,8 +27,8 @@ hipotenusa:
 
     # elevar al cuadrado y chequear no overflow en cateto 1
     mul.s $f2, $f0, $f0 # c1^2
-    mfc1 $t1, $f2
-    beq $t1, $t0, hipotenusa_error
+    mfc1 $t1, $f2 # bits de $f2 en $t1
+    beq $t1, $t0, hipotenusa_error # indicar error
 
     # elevar al cuadrado y chequear no overflow en cateto 2
     mul.s $f3, $f1, $f1 # c2^2
@@ -42,7 +42,9 @@ hipotenusa:
 
     mov.s $f0, $f4 # resultado en $f0
 
+    # se le calcula la raiz a $f0 = c1^2 + c2^2
     jal raiz
+
     j hipotenusa_fin
 
   hipotenusa_error:
