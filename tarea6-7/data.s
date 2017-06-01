@@ -11,7 +11,8 @@
   texto_fin_instruccion: .asciiz "\n  Se termina ejecución de la instrucción\n"
   texto_rpn_stack_error: .asciiz "\nError, stack fuera del rango permitido
   Se termina ejecución de la instrucción\n"
-  texto_error_raiz_menor_a_cero: .asciiz "\nError, argumento de raiz cuadrada no puede ser negativo\n"
+  texto_rpn_div_cero: .asciiz "\nError, division entre cero no permitida"
+  texto_error_raiz_menor_a_cero: .asciiz "\nError, argumento de la raiz cuadrada no puede ser negativo"
 
 
   input_max_len: .word 40 # maxima cantidad de caracteres leidos
@@ -39,11 +40,15 @@
     "
     texto_uso: .asciiz "
     Uso:
+    # El espacio indica que se imprime el último elemento en la pila.
+    # Se recuerda al usuario que para ver la respuesta total se
+    # debe agregar un espacio al final de la instruccion(eg: \"3 4 + \")
+
     # suma: +                  # resta: -
       > 3 4 +                    > 7 4 -
       7 (3 + 4)                  3 (7 - 4)
-
-                                 > 0 4 - # numeros negativos
+                                 # numeros negativos
+                                 > 0 4 -
                                  -4 (0 - 4)
 
     # multiplicación: *        # división: /

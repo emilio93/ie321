@@ -77,27 +77,6 @@ len_string:
     subu $v0, $v0, $a0 # contador final
     jr $ra
 
-# igual a len_string, pero en vez de NULL o /n, termina
-# cuando lee $a1, que es el codigo ascii del caracter
-# limitante
-#
-# devuelve la cantidad de caracteres en $v0
-len_string_char:
-
-  len_string_char_loop:
-    # obtener caracter en $t1
-    lb $t1, 0($v0) # iesimo caracter
-
-    # caracter en $a0 finaliza cuenta
-    beq $t1, $a1, len_string_fin # a[i] = char en $a0
-
-    addiu $v0, $v0, 1 # direccion del siguiente caracter
-    j len_string_loop
-
-  len_string_char_fin:
-    subu $v0, $v0, $a0 # contador final
-    jr $ra
-
 # indica si el byte en su represencacion ascii corresponde
 # a un entero entre 0 y 9
 # $a0 es el byte
@@ -107,7 +86,7 @@ is_byte_int:
   addiu $v0, $zero, 0 # se asume que no es un entero
   addi $v1, $a0, -48 # se inicializa $v1 en su valor si es int
   addiu $t0, $zero, 9 # valor maximo
-  
+
   addiu $t1, $zero, 0
   addiu $t2, $zero, 0
   sge $t1, $v1, $zero # $v0 = 1 si $v1 >= 0

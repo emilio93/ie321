@@ -97,7 +97,6 @@ rpn_ver:
   jr $ra
 
 # stack se salio del rango
-#
 rpn_stack_error:
   addi $sp, $sp, -4
   sw $ra, 0($sp)
