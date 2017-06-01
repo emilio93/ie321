@@ -98,16 +98,22 @@ len_string_char:
     subu $v0, $v0, $a0 # contador final
     jr $ra
 
-# Obtiene en $f0 la representacion float(IEEE754) de un numero
-# en la direccion $a0
-#
-# el formato del numero debe ser el siguiente
-# (n[n])(n[n-1])...(n[1])(n[0])(,)(n[-1])(n[-2])...(n[-m])
-# notese que se permiten unicamente numeros y coma (0-9,)
-#
-# si el primer caracter de la direccion $a0 no es (0-9,),
-# se devuelve 0,0
-#
-# se devuelve inf en caso de overflow
-extract_num:
-  li.s $f0, 0,0 # se incializa resultado en 0
+# indica si el byte en su represencacion ascii corresponde
+# a un entero entre 0 y 9
+# $a0 es el byte
+# $v0 es 1 si el byte representa un entero, 0 en caso contrario
+# $v1 indica el numero en caso que sea entero, en caso contrario su valor es 0
+is_byte_int:
+  addiu $v0, $zero, 0 # se asume que no es un entero
+  addi $v1, $a0, -48 # se inicializa $v1 en su valor si es int
+  addiu $t0, $zero, 9 # valor maximo
+  
+  addiu $t1, $zero, 0
+  addiu $t2, $zero, 0
+  sge $t1, $v1, $zero # $v0 = 1 si $v1 >= 0
+  sle $t2, $v1, $t0 # $v0 = 1 si $v1 <= 9
+  and $v0, $t1, $t2 # se debe cumplir que $v1 >= 0 y $v1 <=9
+  bne $v0, $zero, is_byte_int_fin # cuando es int se finaliza
+    addiu $v1, $zero, 0 # si no es int, $v1 es 0
+  is_byte_int_fin:
+  jr $ra
