@@ -6,65 +6,93 @@ tests_programa_rpn:
     sw $a0, 4($sp)
     s.s $f0, 8($sp)
     s.s $f12, 12($sp)
-    j tests_rpn_stack
+    # j tests_programa_rpn_potencia
+    # j test_raiz
+    # j tests_rpn_stack
 
   tests_programa_rpn_potencia:
+    li $a0, 0x506f7465
+    jal imprimir_bytes_registro # Pote
+    li $a0, 0x6e636961
+    jal imprimir_bytes_registro # ncia
+    jal newline
+
     li.s $f0, 0,25
     li $a0, -2
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # debe imprimir 16,0
     jal newline
 
     li.s $f0, 0,25
     li $a0, 0
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # debe imprimir 1,0
     jal newline
 
     li.s $f0, 0,5
     li $a0, -1
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # debe imprimir 2,0
     jal newline
 
     li.s $f0, 25,0
     li $a0, 1
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # debe imprimir 25,0
     jal newline
 
     li.s $f0, 4,0
     li $a0, 2
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # debe imprimir 16,0
     jal newline
 
     li.s $f0, 2,0
     li $a0, 15
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # debe imprimir 32768,000
     jal newline
 
     li.s $f0, 2,0
     li $a0, 100
     jal potencia
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # muy grande
     jal newline
 
     jal potencia_iterativo
     mov.s $f12, $f0
-    jal imprimir_float
+    jal imprimir_float # muy grande, mas lento
     jal newline
 
-    li $a0, 0x31323334
-    jal imprimir_bytes_registro
+  test_raiz:
+    jal newline
+    li $a0, 0x5261697a
+    jal imprimir_bytes_registro # Raiz
+    jal newline
+
+    li.s $f0, 4,0
+    jal raiz
+    mov.s $f12, $f1
+    jal imprimir_float # debe imprimir 2
+    jal newline
+
+    li.s $f0, 0,0
+    jal raiz
+    mov.s $f12, $f1
+    jal imprimir_float # debe imprimir 0
+    jal newline
+
+    li.s $f0, -4,0
+    jal raiz
+    mov.s $f12, $f1
+    jal imprimir_float # debe imprimir error y terminar el programa
     jal newline
 
   tests_rpn_stack:

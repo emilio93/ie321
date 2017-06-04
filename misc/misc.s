@@ -4,7 +4,7 @@
 # chequear que el contenido de $f0 sea mayor a 0
 #
 # $v0 es 0 si la respuesta es menor o igual a 0
-# $v0 es 1 si la respuesta es mayor a 0
+# $v0 es 1 si la respuesta es mayor a 0, 0 en caso contrario
 respuesta_mayor_a_cero:
   # se asume que $f0 <= 0
   addiu $v0, $zero, 0 # respuesta se inicializa en 0
@@ -42,15 +42,15 @@ min_int:
   min_int_fin:
     jr $ra
 
-  # devuelve en $v0 el mayor entre $a0 y $a1
-  max_int:
-    bgt $a0, $a1, max_int_a0
-      move $v0, $a1
-      j max_int_fin
-    max_int_a0:
-      move $v0, $a0
-    max_int_fin:
-      jr $ra
+# devuelve en $v0 el mayor entre $a0 y $a1
+max_int:
+  bgt $a0, $a1, max_int_a0
+    move $v0, $a1
+    j max_int_fin
+  max_int_a0:
+    move $v0, $a0
+  max_int_fin:
+    jr $ra
 
 # cuenta la cantidad de caracteres en un string
 #

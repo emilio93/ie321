@@ -12,9 +12,6 @@ main:
   jal imprimir_asciiz
   inicio:
 
-    # # tests varios se encuentran en tests_programa_rpn
-    # jal tests_programa_rpn
-
     jal rpn_stack_iniciar # se inicia la pila para el rpn
     li.s $f0, 0,0
     jal rpn_apilar # se carga valor inicial 0

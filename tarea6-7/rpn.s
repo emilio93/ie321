@@ -7,7 +7,7 @@ rpn:
   # guardar registros en el stack pointer
   # inicializar variables necesarias
   rpn_iniciar:
-    addiu $sp, $sp, -16
+    addi $sp, $sp, -16
     sw $ra, 0($sp)
     sw $s0, 4($sp)
     sw $s1, 8($sp)
@@ -78,11 +78,11 @@ rpn:
 
     # 0:48 - 9:57 numeros
     addi $sp, $sp, -4
-    sw $a0, 0($sp) # guardar $a0
+    sw $a0, 0($sp)# guardar $a0
     move $a0, $t0
     jal is_byte_int # indica si el byte $a0 representa un numero en ascii
-    lw $a0, 0($sp) # recuperar $a0
-    addiu $sp, $sp, 4
+    lw $a0, 0($sp)# recuperar $a0
+    addi $sp, $sp, 4
     # su $v0 es 1(no 0), se tiene que es un numero
     bne $v0, $zero, rpn_num
 
@@ -188,131 +188,22 @@ rpn:
   # Convierte una entrada de bytes representando un numero a un float
   # el primer elemento debe ser un numero
   rpn_num:
-    # numero int está en $v1(viene de is_byte_int), se pasa a $f0
-    # y se convierte a float
-    mtc1 $v1, $f0
-    cvt.s.w $f0, $f0
+    addi $sp, $sp, -4
+    sw $a0, 0($sp)
 
-    # base 10
-    # (eg. 123 = 1*100 + 2*10 + 3)
-    li.s $f3, 10,0
+    move $a0, $s2
+    jal bytes_a_float
+    add $s2, $s2, $v0
+    add $s0, $s0, $v0
+    addi $s0, $s0, -1
 
-    addi $t6, $zero, 0 # contador de comas, inicialmente son 0
-    addi $t7, $zero, 0 # $t7 indica si hay coma, inicialmente no hay coma
+    jal rpn_apilar
+    bne $v1, $zero, rpn_fin
 
-    # se lee el siguiente byte para determinar si es o no parte
-    # del numero
-    # para seguir siendo parte del numero debe ser, o un numero o la primer
-    # coma en el string. en caso que el byte no cumpla esos
-    # requisitos se finaliza la obtención del número.
-    rpn_num_loop:
-      # obtiene direccion del siguiente byte
-      # y dicho byte
-      addiu $t1, $s2, 1 # direccion del siguiente byte
-      lb $t2, 0($t1) # byte
+    lw $a0, 0($sp)
+    addi $sp, $sp, 4
 
-      addi $sp, $sp, -8
-      sw $a0, 0($sp) # se guarda $a0
-      sw $t2, 4($sp) # se guarda el byte
-
-      # chequear si es numero
-      move $a0, $t2
-      jal is_byte_int
-      # devuelve $v0 = 1 si es int, $v0 = 0 si no es int
-      #          $v1 = n si es int, $v1 = 0 si no es int
-
-      lw $a0, 0($sp) # se recupera $a0
-      lw $t2, 4($sp) # se recupera el byte
-      addiu $sp, $sp, 8
-
-      # en caso de no ser numero se chequea si es
-      # la primer coma, sino, se finaliza lectura
-      # del numero
-      beq $v0, $zero, rpn_num_no_num
-
-      addiu $s0, $s0, 1 # incrementar contador
-      addiu $s2, $s2, 1 # incrementar direccion
-
-      mtc1 $v1, $f1 # valor está en $v1
-      cvt.s.w $f1, $f1 # se convierte a float
-
-      # se aplica multiplicador correspondiente
-      # f0 = 10*f0 + $f1
-      mul.s $f0, $f0, $f3 # f0 = f0 * 10
-      add.s $f0, $f0, $f1 # f0 = f0 + f1
-
-      bgt $t7, $zero, rpn_num_decimales # $t7 indica que existe coma
-      j rpn_num_loop
-
-    # en caso que se obtenga una coma se verifica si ya existe una coma
-    # en el numero, y sino, la coloca.
-    rpn_num_coma:
-      addiu $t6, $t6, 1 # se incrementa contador de comas
-
-      addiu $s0, $s0, 1 # contador se incrementan
-      addiu $s2, $s2, 1 # contador se incrementan
-
-      addiu $t7, $zero, 1 # indica que hay una coma en el numero
-      # chequea que sea la primer coma
-      # es el caso que $t6=1 == $t7=1, para coma extras, $t6 seria mayor a 1
-      beq $t6, $t7, rpn_num_decimales
-
-      j rpn_caracter_invalido
-
-    # agrega decimales al numero
-    rpn_num_decimales:
-      # incrementa contador de decimales
-      # notese que se tienen n+1 decimales
-      # por el que se agregó en la coma
-      addi $t6, $t6, 1
-      j rpn_num_loop
-
-    # Verifica si se trata de la primer coma en el numero,
-    # caso en que se continua agregando los decimales
-    # Si no es la primer coma, o es otro caracter(ya no puede ser
-    # numero) se finaliza la obtencion del numero
-    rpn_num_no_num:
-      addiu $t5, $zero, 44 # codigo 44 es coma ","
-      beq $t2, $t5, rpn_num_coma
-      j rpn_num_fin
-
-    # corrige el numero para que tenga los puntos decimales adecuados
-    # recupera registros del stack y finaliza obtencion del numero
-    rpn_num_fin:
-
-      addi $sp, $sp, -4
-      sw $a0, 0($sp) # guardar $a0
-
-      mov.s $f4, $f0 # se guarda $f0 en $f4
-
-      # se obtiene potencia para la coma en $a0
-      sub $a0, $zero, $t6
-      addi $a0, $a0, 2
-
-      beq $t7, $zero, rpn_num_is_int # si no tiene coma se procesa como entero
-      mov.s $f0, $f3 # multiplicador inicialmente es 10,0
-
-        # 10^-$t6, obtiene multiplicador
-        jal potencia
-        j rpn_num_is_float
-
-      # en caso que sea int el multiplicador es 1
-      rpn_num_is_int:
-      li.s $f0, 1,0
-
-      # para ambos casos
-      rpn_num_is_float:
-      mov.s $f5, $f0 # $f5 es multiplicador
-      mov.s $f0, $f4 # $f6 es el numero digitado por el usuario sin comas
-      mul.s $f0, $f0, $f5 # $f0 es float ingresado por el usuario
-
-      jal rpn_apilar
-      bne $v1, $zero, rpn_fin
-
-      lw $a0, 0($sp) # recuperar $a0
-      addi $sp, $sp, 4
-
-      j rpn_leer_check
+    j rpn_leer_check
 
   # reinicializa la pila
   rpn_reiniciar:
@@ -324,8 +215,9 @@ rpn:
   # calcula la potencia del penultimo numero
   # elevado al ultimo numero
   rpn_potencia:
-    addi $sp, $sp, -4 # $a0 se debe guardar
-    sw $a0, 0($sp)
+    addi $sp, $sp, -8 # $a0 se debe guardar
+    sw $ra, 0($sp)
+    sw $a0, 4($sp)
 
     jal rpn_desapilar
     bne $v1, $zero, rpn_fin
@@ -341,8 +233,9 @@ rpn:
     jal rpn_apilar
     bne $v1, $zero, rpn_fin
 
-    lw $a0, 0($sp) # se recupera $a0
-    addi $sp, $sp, 4
+    sw $ra, 0($sp)
+    lw $a0, 4($sp) # se recupera $a0
+    addi $sp, $sp, 8
 
     j rpn_leer_check
 

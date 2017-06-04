@@ -100,13 +100,17 @@ rpn_ver:
 rpn_stack_error:
   addi $sp, $sp, -4
   sw $ra, 0($sp)
+
   la $a0, texto_rpn_stack_error
   jal imprimir_asciiz
+  addiu $v1, $zero, 1 # se indica error
+
   lw $ra, 0($sp)
   addiu $sp, $sp, 4
-  addiu $v1, $zero, 1 # se indica error
+
   # regresar a ejecucion del programa
   jr $ra
+
   # comentar linea anterior para finalizar ejecucion en
   # caso de error en direccion de la pila
   addiu $v0, $zero, 10

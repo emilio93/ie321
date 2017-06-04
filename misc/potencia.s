@@ -21,7 +21,7 @@
 potencia:
   # se guardan registros
   potencia_guardar_registros:
-    addiu $sp, $sp, -12
+    addi $sp, $sp, -12
     sw $ra, 0($sp)
     sw $s0, 4($sp)
     sw $s1, 8($sp)
