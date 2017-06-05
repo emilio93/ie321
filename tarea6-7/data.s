@@ -20,9 +20,6 @@
                           # en input_string
   input_string: .space 40 # maxima cantidad de caracteres en input_string
   .align 2
-  max_rpn_len: .word 128
-  rpn_stack: .space 128 # stack para la calculadora
-                        # 128 bytes = 128/4 palabras = 32 palabras = 32 floats
 
   texto_bienvenida: .asciiz"  _____       _            _           _
  / ____|     / |          / |         / |

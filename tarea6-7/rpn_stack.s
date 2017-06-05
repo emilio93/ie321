@@ -1,3 +1,9 @@
+# datos del stack
+.data
+  max_rpn_len: .word 128
+  rpn_stack: .space 128 # stack para la calculadora
+                        # 128 bytes = 128/4 palabras = 32 palabras = 32 floats
+.text
 # Estas dos funciones se hacen cargo de apilar y desapilar
 # del espacio rpn_stack
 #
