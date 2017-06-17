@@ -11,7 +11,6 @@
 #
 #datos utilizados en el programa
 .data
-  texto_newline: .asciiz "\n"
 
   ej1_cateto1: .float 3,0
   ej1_cateto2: .float 4,0

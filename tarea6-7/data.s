@@ -4,7 +4,6 @@
 # datos utilizados en el programa
 .data
 
-  texto_newline: .asciiz "\n"
   texto_solicitud_instruccion: .asciiz "Ingrese la instruccion:\n"
   texto_error_caracter_invalido_1: .asciiz "Error, caracter no permitido: `"
   texto_error_caracter_invalido_2: .asciiz "` en la posición: "
