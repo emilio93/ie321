@@ -5,6 +5,12 @@
 # modifican ningun registro(excepto los temporales, $t0-$t9, si bien pueden no
 # modificarse todos, no se recomienda contar con que no se modifiquen)
 
+.data
+  texto_newline: .asciiz "\n"
+
+.align 2
+.text
+
 # imprime un caracter newline
 # no modifica registros(mantiene sus
 # valores una vez que se sale de la
@@ -12,7 +18,6 @@
 # modifica $t0, $t1
 # Uso:
 #   > jal newline
-#
 #
 newline:
   move $t0, $v0 # guardar $v0

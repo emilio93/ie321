@@ -9,7 +9,6 @@ raiz_cuadrada.s \
 build/misc.s
 
 cat \
-data.s \
 misc_tests.s \
 misc.s \
 impresion.s \

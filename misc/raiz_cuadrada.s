@@ -27,9 +27,11 @@
 
 raiz:
   raiz_guardar_registros:
-    addiu $sp, $sp, -8
+    addi $sp, $sp, -16
     sw $s0, 0($sp)
     sw $s1, 4($sp)
+    s.s $f2, 8($sp)
+    s.s $f3, 12($sp)
 
   raiz_iniciar:
     # chequear casos iniciales $f0 = 0,0 o $f0 < 0,0
@@ -78,7 +80,9 @@ raiz:
   raiz_fin:
     lw $s0, 0($sp)
     lw $s1, 4($sp)
-    addiu $sp, $sp, 8
+    l.s $f2, 8($sp)
+    l.s $f3, 12($sp)
+    addi $sp, $sp, 16
     jr $ra
 
   raiz_error_negativo:
